@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import body from "body-parser";
 
-const app = express();
+const app = express()
 
 let server;
 
