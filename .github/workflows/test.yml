@@ -1,0 +1,22 @@
+name: Test Project
+
+#trigger
+on:
+ pull_request:
+   branches:
+     - main
+jobs: 
+  test:
+  #the example was ran in ubuntu
+    runs-on: ubuntu-latest
+    container:
+      image: node 20
+    steps:
+      - uses: actions/checkout@v3   #using checkout action
+        with:
+          node-version: 20
+      - run: npm ci  #check all dependencies environment and install it automatically
+      - run: npm test
+      - run: npm run build
+      
+  
