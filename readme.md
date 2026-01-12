@@ -9,7 +9,7 @@ Github Actions is a CI/CD tool that allows you to automate your workflow. It is 
 
 ## Steps
 2. Create a new file in the `.github/workflows` directory
-3. Define the workflow
+3. Define the workflows
 4. Push the changes to the repository
 5. Check the Actions tab in the repository
 
