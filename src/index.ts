@@ -33,7 +33,8 @@ async function startServer() {
     });
   } catch (error) {
     console.error("Failed to connect to the database:", error);
-    process.exit(1);
+    // Instead of process.exit(1);
+    throw new Error("Failed to connect to the database: " + error);
   }
 }
 
