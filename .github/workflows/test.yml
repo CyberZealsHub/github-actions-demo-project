@@ -1,0 +1,19 @@
+name: Test Project
+
+on:
+  pull_request: # running it everytime a pull request on the main branch (triggers)
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container: # node js container
+      image: node:20
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          node-version: 20
+      - run: npm ci # installs all dependencies
+      - run: npm test
+      - run: npm run build
