@@ -24,7 +24,7 @@ export async function getRecipe(req, res) {
         "1/4 tsp red pepper flakes",
         "1/4 cup parsley",
         "8 oz fettuccine pasta",
-        "chicken ofc for protein"
+        "chicken ofc for protein or turkey is good"
       ],
       cookingTime: 40,
       instructions: [
