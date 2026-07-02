@@ -4,8 +4,7 @@ export async function getRecipe(req, res) {
 
   const { id } = req.params;
 
-  console.log(`Fetching recipe with ID: ${id}`);
-
+  
   try {
 
     return httpResponse(200, 'Recipe Found', {
