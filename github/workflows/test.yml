@@ -1,9 +1,12 @@
 name: Test Project
 
 on:
+ push:
+  branches:
+    - main
  pull_request:
   branches:
-   - main
+    - main
 
 jobs: 
   test:
