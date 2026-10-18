@@ -82,7 +82,7 @@ npm run build
 
 ## GitHub Actions
 
-The workflow is `.github/workflows/webpack.yml`. It runs on pushes and pull
+The CI workflow is `.github/workflows/webpack.yml`. It runs on pushes and pull
 requests targeting `main` for Node.js 22 and 24. It installs the locked
 dependencies with `npm ci`, type-checks the TypeScript source with
 `npx tsc --noEmit`, and runs the Jest tests.
@@ -91,3 +91,10 @@ The earlier workflow failed because it ran `npx webpack` without a Webpack
 configuration or a declared Webpack CLI. In CI, Webpack prompted to install
 `webpack-cli`, but the runner cannot answer interactive prompts. The updated
 workflow runs the checks this API actually uses instead.
+
+The CodeQL workflow (`.github/workflows/codeql.yml`) scans JavaScript and
+TypeScript on pushes and pull requests to `main`, weekly, and when manually
+started. Pull requests use a checklist for design and security reviews. On a
+published GitHub release, CI starts the API and measures 30 requests to
+`GET /recipes/1`; the measured p95 response latency must be under 2 seconds.
+This is an API latency check, not a browser page-load measurement.

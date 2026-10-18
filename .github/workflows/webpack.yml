@@ -5,6 +5,8 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  release:
+    types: [ published ]
 
 jobs:
   build:
@@ -30,3 +32,38 @@ jobs:
 
     - name: Test
       run: npm test -- --runInBand
+
+  release-performance:
+    if: github.event_name == 'release' && github.event.action == 'published'
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Use Node.js 24
+      uses: actions/setup-node@v7
+      with:
+        node-version: 24.x
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Start API and measure endpoint performance
+      shell: bash
+      run: |
+        node --require ts-node/register src/index.ts > "$RUNNER_TEMP/recipe-api.log" 2>&1 &
+        server_pid=$!
+        trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+
+        for attempt in {1..30}; do
+          if curl --fail --silent http://127.0.0.1:3000/recipes/1 > /dev/null; then
+            node scripts/performance-smoke-test.js
+            exit 0
+          fi
+          sleep 1
+        done
+
+        cat "$RUNNER_TEMP/recipe-api.log"
+        echo "The Recipe API did not start within 30 seconds." >&2
+        exit 1
