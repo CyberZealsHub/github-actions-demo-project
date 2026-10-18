@@ -1,10 +1,12 @@
-name: NodeJS with Webpack
+name: Recipe API CI
 
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  release:
+    types: [ published ]
 
 jobs:
   build:
@@ -12,17 +14,56 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x, 22.x]
+        node-version: [22.x, 24.x]
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v7
       with:
         node-version: ${{ matrix.node-version }}
 
-    - name: Build
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Type-check
+      run: npx tsc --noEmit
+
+    - name: Test
+      run: npm test -- --runInBand
+
+  release-performance:
+    if: github.event_name == 'release' && github.event.action == 'published'
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Use Node.js 24
+      uses: actions/setup-node@v7
+      with:
+        node-version: 24.x
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Start API and measure endpoint performance
+      shell: bash
       run: |
-        npm install
-        npx webpack
+        node --require ts-node/register src/index.ts > "$RUNNER_TEMP/recipe-api.log" 2>&1 &
+        server_pid=$!
+        trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+
+        for attempt in {1..30}; do
+          if curl --fail --silent http://127.0.0.1:3000/recipes/1 > /dev/null; then
+            node scripts/performance-smoke-test.js
+            exit 0
+          fi
+          sleep 1
+        done
+
+        cat "$RUNNER_TEMP/recipe-api.log"
+        echo "The Recipe API did not start within 30 seconds." >&2
+        exit 1
